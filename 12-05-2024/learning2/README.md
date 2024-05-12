@@ -1,0 +1,22 @@
+# topics
+
+- rfce
+- array
+- change style dynamically
+- useRef
+- controlled components
+- uncontrolled components
+- child to parent
+- css change
+- map and keys
+- ul and li in react
+- every keyword
+- table in react
+- dynamic entry in table
+- switch case in react
+- error handling
+- validations
+- validation css
+- focus using useRef
+- spread operator
+- https://drive.google.com/drive/folders/1cCDWoA0CdtWEwwjPeojbiWpcVSh8iENt
