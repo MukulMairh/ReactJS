@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div>
+        <input type="text" placeholder="Enter Name" id="inputName">
+        <button onclick="submitForm()">Submit</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        function submitForm() {
+            console.log("submitForm");
+            const inputName = document.getElementById("inputName");
+            const result = document.getElementById("result");
+
+            const name = inputName.value;
+            if (name.trim() != '') {
+                result.innerHTML = '<p>Hello,' + name + ' Welcome to our website! </p>'
+            }
+            else {
+                result.innerHTML = '<p>Please enter name</p>'
+            }
+        }
+    </script>
+</body>
+
+</html>
