@@ -33,4 +33,6 @@
 - delete user
 - reset user, incase you want to clear what has been typed
 - reduser - use reducer
+- useCallback - it will return function
+- useMemo - it will return value
 -

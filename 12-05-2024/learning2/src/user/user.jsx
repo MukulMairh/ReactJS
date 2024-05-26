@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react'
+import React, { useEffect, useMemo, useReducer } from 'react'
 import { useRef } from 'react';
 import { useState } from 'react'
 
@@ -20,14 +20,14 @@ function User() {
     }
     const [user, setUser] = useState(initialUser);
 
-    const [userList, setUserList] = useState([]);
+    // const [userList, setUserList] = useState([]);
 
     const [disableInputId, setDisableInputId] = useState(false);//for edit
 
     const INSERT = "INSERT";
     const UPDATE = "UPDATE";
     const DELETE = "DELETE";
-
+    const USER_CHANGE = "USER_CHANGE";
     /**
      * action {type: "Insert", payload: newUser}
      * action {type: "Update", payload: updateUser }
@@ -35,6 +35,9 @@ function User() {
      * => reducer function will return update state
      * => we write logic based on action, type and return updated state
      * => dispatch will help you to make any changes with state variable
+     * 
+     * use Reducer > reducer and data 
+     *  
      */
     const reducer = (state, action) => {
         //action => insert, update, delete 
@@ -42,17 +45,29 @@ function User() {
         switch (action.type) {
             case INSERT:
                 //new user=>action.payload
-
+                return [action.payload, ...state];
                 break;
             case UPDATE:
+                const { payload: user } = action;
+                const copyUserList = [...state];
+                const userIndex = state.findIndex(userValue => userValue.id === user.id);
+                copyUserList.splice(userIndex, 1, user);
+                return copyUserList;
                 break;
             case DELETE:
+                const { payload: deleteUser } = action;
+                const userListAfterDelete = state.filter(userValue => userValue.id !== deleteUser.id);
+                return userListAfterDelete;
                 break;
+            case USER_CHANGE:
+            //this one is for validation. 
 
+            default:
+                return state;
         }
     }
 
-    const [state, dispatch] = useReducer(reducer, []);
+    const [state, dispatch] = useReducer(reducer, []);//reducer state 
 
     const firstIdFocusRef = useRef(null);
     useEffect(() => {
@@ -110,20 +125,18 @@ function User() {
                 break;
         }
 
-
         setUser({
             ...user,
             [name]: value //property name is dynamic here, so it will go like firstName, lastName, email, gender with single line.
         })
 
-        console.log("user => ", user);
+        // console.log("user => ", user);
     }
 
 
     // const firstNameInputRef = useRef(null);
 
     const handleSubmitClick = () => {
-
         const userKeys = Object.keys(user);
         const userValues = Object.values(user);
         console.log(userKeys);
@@ -136,17 +149,18 @@ function User() {
 
             if (disableInputId) {
                 //update user
-                const copyUserList = [...userList];
-                const userIndex = userList.findIndex(userValue => userValue.id === user.id);
-                copyUserList.splice(userIndex, 1, user);
-                setUserList(copyUserList);
-                setDisableInputId(false);
+                // const copyUserList = [...userList];
+                // const userIndex = userList.findIndex(userValue => userValue.id === user.id);
+                // copyUserList.splice(userIndex, 1, user);
+                // setUserList(copyUserList);
 
+                dispatch({ type: UPDATE, payload: user });
+                setDisableInputId(false);
 
             }
             else {
                 //insert new user 
-                setUserList([user, ...userList]);
+                // setUserList([user, ...userList]);
                 dispatch({ type: INSERT, payload: user });
             }
 
@@ -158,6 +172,7 @@ function User() {
     }
 
     const errorStyle = { color: 'red' }
+
 
     /**
      * Update User 
@@ -174,8 +189,9 @@ function User() {
         console.log(deleteUser);
         const result = window.confirm(`Are you sure you want to delete ${deleteUser.firstName} ${deleteUser.lastName}`);
         if (result) {
-            const userListAfterDelete = userList.filter(userValue => userValue.id !== deleteUser.id);
-            setUserList(userListAfterDelete);
+            dispatch({ type: DELETE, payload: user });
+            // const userListAfterDelete = userList.filter(userValue => userValue.id !== deleteUser.id);
+            // setUserList(userListAfterDelete); 
         }
     };
 
@@ -187,6 +203,16 @@ function User() {
         setUser(initialUser);
         firstIdFocusRef.current.focus();
     }
+
+    /**
+     * useCallback => Catch function 
+     * I will return function 
+     * 
+     * useMemo => Catch result of function  
+     */
+
+    //What should I do when  don't have a separate table component? 
+    const userListtableData = useMemo(() => state, [state]);
 
     return (
 
@@ -219,7 +245,9 @@ function User() {
 
             <h3>User List</h3>
             {
-                userList.length === 0 ? (
+                // userList 
+                //state
+                userListtableData.length === 0 ? (
                     <p>No users.</p>
                 ) : (<table border={1}>
                     <thead>
@@ -235,7 +263,7 @@ function User() {
                     <tbody>
 
                         {
-                            userList.map((value, index) => (
+                            userListtableData.map((value, index) => (
                                 <tr key={index}>
                                     <td>{value.id}</td>
                                     <td>{value.firstName}</td>
