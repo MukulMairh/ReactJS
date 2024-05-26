@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react'
 import { useRef } from 'react';
 import { useState } from 'react'
 
@@ -56,6 +56,7 @@ function User() {
                 break;
             case DELETE:
                 const { payload: deleteUser } = action;
+                debugger;
                 const userListAfterDelete = state.filter(userValue => userValue.id !== deleteUser.id);
                 return userListAfterDelete;
                 break;
@@ -185,15 +186,15 @@ function User() {
     /**
      * Delete User
      */
-    const deleteUser = (deleteUser) => {
+    const deleteUser = useCallback((deleteUser) => {
         console.log(deleteUser);
         const result = window.confirm(`Are you sure you want to delete ${deleteUser.firstName} ${deleteUser.lastName}`);
         if (result) {
-            dispatch({ type: DELETE, payload: user });
+            dispatch({ type: DELETE, payload: deleteUser });
             // const userListAfterDelete = userList.filter(userValue => userValue.id !== deleteUser.id);
             // setUserList(userListAfterDelete); 
         }
-    };
+    }, []);
 
     /**
      * reset Button Fucntion
