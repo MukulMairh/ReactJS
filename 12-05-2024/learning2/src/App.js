@@ -4,6 +4,8 @@ import Customer from './customer';
 import { useState } from 'react';
 import Cities from './cities/cities';
 import User from './user/user';
+import Header from './header/Header';
+import { Outlet } from 'react-router-dom';
 
 function App() {
 
@@ -11,11 +13,12 @@ function App() {
 
   return (
     <div className="App">
+      <Header></Header>
+      <Outlet></Outlet>
       <Customer customerName={customerName} setCustomerName={setCustomerName}></Customer>
       <p>customerName : {customerName}</p>
-
-      <Cities></Cities>
-      <User></User>
+      {/* <Cities></Cities>
+      <User></User> */}
     </div>
   );
 }

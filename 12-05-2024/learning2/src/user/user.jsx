@@ -1,24 +1,66 @@
-import React from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { useRef } from 'react';
 import { useState } from 'react'
 
 function User() {
 
     const initialUser = {
+        id: "",
         firstName: "",
         lastName: "",
         email: "",
         gender: "",
         error: {
-            firstName: "*",
-            lastName: "*",
-            email: "*",
-            gender: "*"
+            id: "Required",
+            firstName: "Required*",
+            lastName: "Required*",
+            email: "Required*",
+            gender: "Required*"
         }
     }
     const [user, setUser] = useState(initialUser);
 
     const [userList, setUserList] = useState([]);
+
+    const [disableInputId, setDisableInputId] = useState(false);//for edit
+
+    const INSERT = "INSERT";
+    const UPDATE = "UPDATE";
+    const DELETE = "DELETE";
+
+    /**
+     * action {type: "Insert", payload: newUser}
+     * action {type: "Update", payload: updateUser }
+     * action {type: "Delete", payload: deleteUser}
+     * => reducer function will return update state
+     * => we write logic based on action, type and return updated state
+     * => dispatch will help you to make any changes with state variable
+     */
+    const reducer = (state, action) => {
+        //action => insert, update, delete 
+
+        switch (action.type) {
+            case INSERT:
+                //new user=>action.payload
+
+                break;
+            case UPDATE:
+                break;
+            case DELETE:
+                break;
+
+        }
+    }
+
+    const [state, dispatch] = useReducer(reducer, []);
+
+    const firstIdFocusRef = useRef(null);
+    useEffect(() => {
+        if (firstIdFocusRef) {
+            firstIdFocusRef.current.focus();
+        }
+    }, [firstIdFocusRef])
+
 
     const handleChange = (event) => {
         // Destructre name and value from target input element
@@ -26,6 +68,14 @@ function User() {
 
         const error = user.error
         switch (name) {
+            case "id":
+                if (value === "") {
+                    error.id = "Required";
+                }
+                else {
+                    error.id = "";
+                }
+                break;
             case "firstName":
                 if (value === "") {
                     error.firstName = "Required";
@@ -70,7 +120,8 @@ function User() {
     }
 
 
-    const firstNameInputRef = useRef(null);
+    // const firstNameInputRef = useRef(null);
+
     const handleSubmitClick = () => {
 
         const userKeys = Object.keys(user);
@@ -82,21 +133,72 @@ function User() {
         console.log(everyValueShouldNotBeBlank);
         if (everyValueShouldNotBeBlank
         ) {
-            setUserList([user, ...userList]);
+
+            if (disableInputId) {
+                //update user
+                const copyUserList = [...userList];
+                const userIndex = userList.findIndex(userValue => userValue.id === user.id);
+                copyUserList.splice(userIndex, 1, user);
+                setUserList(copyUserList);
+                setDisableInputId(false);
+
+
+            }
+            else {
+                //insert new user 
+                setUserList([user, ...userList]);
+                dispatch({ type: INSERT, payload: user });
+            }
+
             //clear form after submit 
             setUser(initialUser);
-            firstNameInputRef.current.focus();
+            // firstNameInputRef.current.focus();
+            firstIdFocusRef.current.focus();
         }
     }
 
     const errorStyle = { color: 'red' }
+
+    /**
+     * Update User 
+     * For update and delete user we need to send the user itself, where as in case of checking the changes we used to send event as parameter.*/
+    const updateUser = (editUser) => {
+        console.log(editUser);
+        setUser(editUser);
+        setDisableInputId(true);
+    };
+    /**
+     * Delete User
+     */
+    const deleteUser = (deleteUser) => {
+        console.log(deleteUser);
+        const result = window.confirm(`Are you sure you want to delete ${deleteUser.firstName} ${deleteUser.lastName}`);
+        if (result) {
+            const userListAfterDelete = userList.filter(userValue => userValue.id !== deleteUser.id);
+            setUserList(userListAfterDelete);
+        }
+    };
+
+    /**
+     * reset Button Fucntion
+     */
+    const resetUser = () => {
+        setDisableInputId(false);
+        setUser(initialUser);
+        firstIdFocusRef.current.focus();
+    }
+
     return (
 
         <div>
             <hr />
             <h1>User Form</h1>
             <br />
-            First Name<input type="text" placeholder='First Name' name='firstName' value={user.firstName} onChange={handleChange} ref={firstNameInputRef}
+            ID<input type="text" placeholder='Enter your ID' name='id' value={user.id} onChange={handleChange} ref={firstIdFocusRef}
+                disabled={disableInputId} />
+            <span style={errorStyle}>{user.error.id}</span>
+            <br />
+            First Name<input type="text" placeholder='First Name' name='firstName' value={user.firstName} onChange={handleChange}
             />
             <span style={errorStyle}>{user.error.firstName}</span>
             <br />
@@ -113,6 +215,7 @@ function User() {
             <button onClick={handleSubmitClick}>
                 Submit
             </button>
+            <button onClick={() => { resetUser() }}>Reset</button>
 
             <h3>User List</h3>
             {
@@ -121,10 +224,12 @@ function User() {
                 ) : (<table border={1}>
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Email</th>
                             <th>Gender</th>
+                            <th>#</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -132,10 +237,16 @@ function User() {
                         {
                             userList.map((value, index) => (
                                 <tr key={index}>
+                                    <td>{value.id}</td>
                                     <td>{value.firstName}</td>
                                     <td>{value.lastName}</td>
                                     <td>{value.email}</td>
                                     <td>{value.gender}</td>
+                                    <td>
+                                        <button onClick={() => { updateUser(value) }}>Update</button>&nbsp;
+                                        <button onClick={() => { deleteUser(value) }}>Delete</button>&nbsp;
+
+                                    </td>
                                 </tr>
                             ))
                         }
